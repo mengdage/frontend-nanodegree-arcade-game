@@ -48,6 +48,7 @@ var Engine = (function(global) {
         update(dt);
         render();
 
+        // if the play wins, increase the score and reset the player
         if(checkWin()){
           console.log('you win!');
           scoreBoard.update(1);
@@ -92,11 +93,16 @@ var Engine = (function(global) {
           player.reset();
         }
     }
+
+    // Check if any collision between player and enemies
+    // return true if there is a collision
     function checkCollisions() {
       var playerLeft = player.x;
       var playerRight = player.x + 101;
       for(var i = 0; i < allEnemies.length; i++) {
         var enemy = allEnemies[i];
+        // 1. check if the enemy is in the same row with the player
+        // 2. check if collision
         if((enemy.row === player.row) && (enemy.x<playerRight && (enemy.x+101)>playerLeft)){
           return true;
         }
@@ -104,6 +110,8 @@ var Engine = (function(global) {
       return false;
     }
 
+    // Check if player has winned by checking if player
+    // has reached row 0
     function checkWin() {
       if(player.row === 0) {
         return true;

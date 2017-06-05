@@ -1,25 +1,33 @@
 // Enemies our player must avoid
 var Enemy = function() {
-    // Variables applied to each of our instances go here,
-    // we've provided one for you to get started
-
     // The image/sprite for our enemies, this uses
     // a helper we've provided to easily load images
     this.sprite = 'images/enemy-bug.png';
+    this.col = 0;
+    this.x = 0;
+    this.row = 0;
+    this.y = 0;
+    this.speed = 0;
+
     this.newSpeed();
     this.newRow();
     this.initCol();
 };
 
+// reset the enemy's speed
 Enemy.prototype.newSpeed = function() {
   this.speed = Math.round((Math.random()*5+2)*100);
   // console.log('speed: '+this.speed);
 }
+
+// reset the enemy's row position
 Enemy.prototype.newRow= function() {
   this.row = Math.floor(Math.random()*3)+1;
   this.y = this.row*83-21;
   // console.log('row: ' + this.y);
 }
+
+// initialize the enemy's row position
 Enemy.prototype.initCol = function() {
   this.x = -101;
 }
@@ -30,15 +38,15 @@ Enemy.prototype.update = function(dt) {
     // You should multiply any movement by the dt parameter
     // which will ensure the game runs at the same speed for
     // all computers.
-    // console.log(ctx.width);
     if(this.x < 505) {
+      // if the enemy is in the screen, increase the enemy's x position value
       this.x += this.speed * dt;
     } else {
+      // if the enemy is outside the screen, reset the enemy's speed, row position and x position value
       this.newSpeed();
       this.newRow();
       this.initCol();
     }
-    // console.log(this.x);
 };
 
 // Draw the enemy on the screen, required method for game
@@ -46,30 +54,33 @@ Enemy.prototype.render = function() {
     ctx.drawImage(Resources.get(this.sprite), this.x, this.y);
 };
 
-// Now write your own player class
-// This class requires an update(), render() and
-// a handleInput() method.
+// The player class
 var Player = function(){
   this.sprite = 'images/char-pink-girl.png';
-  // this.sprite = 'images/char-boy.png';
   this.reset();
 }
 
+/* Set the player's initial location
+ * put the player at row 4 column 2.
+ */
 Player.prototype.reset = function() {
   this.row = 4;
   this.col = 2;
   this.x = 505/5*this.col;
   this.y = 83*this.row-7;
-
 }
+
+// Update the player's state if necessary
 Player.prototype.update = function(dt) {
 
 }
 
+// Draw the player on the screen at (x, y)
 Player.prototype.render= function() {
   ctx.drawImage(Resources.get(this.sprite), this.x, this.y);
 }
 
+// Change the player's position according to the user's input
 Player.prototype.handleInput = function(direction) {
   switch (direction) {
     case 'left':
@@ -97,19 +108,25 @@ Player.prototype.handleInput = function(direction) {
       }
       break;
     default:
-      // console.log('unknow direction unput');
   }
 }
+
+// The score board class
 var Score = function() {
   this.oldValue = -1;
   this.value = 0;
+  // (x, y) is the position where to print the score on the screen
   this.x = 10;
   this.y = 38;
 };
+
+// Update the score value by adding parameter v to the value
 Score.prototype.update = function(v) {
   this.oldValue = this.value;
   this.value += v;
 }
+
+// If the score value is changed, update the score on screen
 Score.prototype.render = function() {
   if(this.value !== this.oldValue) {
 
@@ -121,15 +138,16 @@ Score.prototype.render = function() {
     ctx.fillText('score: ' + this.value, this.x, this.y);
   }
 }
-// Now instantiate your objects.
+
 // Place all enemy objects in an array called allEnemies
 var allEnemies = [];
 allEnemies.push(new Enemy());
 allEnemies.push(new Enemy());
 allEnemies.push(new Enemy());
-// allEnemies.push(new Enemy());
+
 // Place the player object in a variable called player
 var player = new Player();
+// The score board object
 var scoreBoard = new Score();
 
 // This listens for key presses and sends the keys to your
