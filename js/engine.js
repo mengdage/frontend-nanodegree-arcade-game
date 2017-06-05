@@ -48,6 +48,11 @@ var Engine = (function(global) {
         update(dt);
         render();
 
+        if(checkWin()){
+          console.log('you win!');
+          scoreBoard.update(1);
+          player.reset();
+        }
         /* Set our lastTime variable which is used to determine the time delta
          * for the next time this function is called.
          */
@@ -81,6 +86,30 @@ var Engine = (function(global) {
     function update(dt) {
         updateEntities(dt);
         // checkCollisions();
+        if(checkCollisions()) {
+          console.log('you lost');
+          scoreBoard.update(-1);
+          player.reset();
+        }
+    }
+    function checkCollisions() {
+      var playerLeft = player.x;
+      var playerRight = player.x + 101;
+      for(var i = 0; i < allEnemies.length; i++) {
+        var enemy = allEnemies[i];
+        if((enemy.row === player.row) && (enemy.x<playerRight && (enemy.x+101)>playerLeft)){
+          return true;
+        }
+      }
+      return false;
+    }
+
+    function checkWin() {
+      if(player.row === 0) {
+        return true;
+      } else {
+        return false;
+      }
     }
 
     /* This is called by the update function and loops through all of the
@@ -132,7 +161,7 @@ var Engine = (function(global) {
                  * so that we get the benefits of caching these images, since
                  * we're using them over and over.
                  */
-                ctx.drawImage(Resources.get(rowImages[row]), col * 101, row * 83);
+                ctx.drawImage(Resources.get(rowImages[row]), col * canvas.width/numCols, row * 83);
             }
         }
 
@@ -152,6 +181,7 @@ var Engine = (function(global) {
         });
 
         player.render();
+        scoreBoard.render();
     }
 
     /* This function does nothing but it could have been a good place to
@@ -171,7 +201,8 @@ var Engine = (function(global) {
         'images/water-block.png',
         'images/grass-block.png',
         'images/enemy-bug.png',
-        'images/char-boy.png'
+        'images/char-boy.png',
+        'images/char-pink-girl.png'
     ]);
     Resources.onReady(init);
 
