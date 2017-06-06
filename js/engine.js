@@ -15,6 +15,7 @@
  */
 
 var Engine = (function(global) {
+    'use strict';
     /* Predefine the variables we'll be using within this scope,
      * create the canvas element, grab the 2D context for that canvas
      * set the canvas elements height/width and add it to the DOM.
@@ -48,12 +49,6 @@ var Engine = (function(global) {
         update(dt);
         render();
 
-        // if the play wins, increase the score and reset the player
-        if(checkWin()){
-          console.log('you win!');
-          scoreBoard.update(1);
-          player.reset();
-        }
         /* Set our lastTime variable which is used to determine the time delta
          * for the next time this function is called.
          */
@@ -110,15 +105,7 @@ var Engine = (function(global) {
       return false;
     }
 
-    // Check if player has winned by checking if player
-    // has reached row 0
-    function checkWin() {
-      if(player.row === 0) {
-        return true;
-      } else {
-        return false;
-      }
-    }
+
 
     /* This is called by the update function and loops through all of the
      * objects within your allEnemies array as defined in app.js and calls
