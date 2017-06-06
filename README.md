@@ -3,7 +3,7 @@ frontend-nanodegree-arcade-game
 
 ## How to play:
 
-1. Open the index.html.
+1. Open the index.html or you can play the game [here]( https://mengdage.github.io/frontend-nanodegree-arcade-game/).
 
 2. Use arrow key to control the character.
 
