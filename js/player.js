@@ -82,19 +82,39 @@
   };
 
   // add keydown listen
-  Player.prototype.listenKeydown = function() {
+  Player.prototype.listenDirectionOps = function() {
+    var centerX = ctx.boundingRect.left + ctx.boundingRect.width/2,
+        centerY = ctx.boundingRect.top + ctx.boundingRect.height/2;
+    var allowedKeys = {
+        37: 'left',
+        38: 'up',
+        39: 'right',
+        40: 'down'
+    };
     // This listens for key presses and sends the keys to your
     // Player.handleInput() method. You don't need to modify this.
     document.addEventListener('keydown', function(e) {
-        var allowedKeys = {
-            37: 'left',
-            38: 'up',
-            39: 'right',
-            40: 'down'
-        };
-
         player.handleInput(allowedKeys[e.keyCode]);
     });
+    document.addEventListener('click', function(e){
+      var x = e.clientX-ctx.boundingRect.left, y = e.clientY-ctx.boundingRect.top;
+      console.log(`(${x},${y})`);
+      console.log(`(${player.x}, ${player.y})`);
+      var direction = '';
+      if(x<player.x) {
+        direction = 'left';
+      } else if(x>player.x+101){
+        direction = 'right';
+      } else {
+        if(y<player.y+60) {
+          direction = 'up';
+        } else if(y>player.y+145) {
+          direction = 'down';
+        }
+      }
+      player.handleInput(direction);
+    });
+
 
   };
 

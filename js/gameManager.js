@@ -1,10 +1,9 @@
 (function(global) {
   'use strict';
   var manager;
+  // buttons on characterChosen
   var canvas = document.getElementsByTagName('canvas')[0];
   var util = global.util;
-  // var player = global.player;
-
   var characterSprites = [
     'images/char-boy.png',
     'images/char-pink-girl.png',
@@ -76,6 +75,8 @@
       y: 30
     }
   };
+  var chButtons = config.characterChosen.buttons;
+
   // Check if any collision between player and enemies
   // return true if there is a collision
   function checkCollisions() {
@@ -91,14 +92,14 @@
     }
     return false;
   }
-  // manage player and allEnemies
+  // manage updating player and allEnemies
   // return true: need updating other objects
   // return false: dont need updating other objects
   function update() {
     if(!config.characterChosen.active) { // check if updating player, enemies are needed
       if(!player) {
         player = new Player(gameState.userImg);
-        player.listenKeydown();
+        player.listenDirectionOps();
       }
       if(checkCollisions()) {
         console.log('you lost');
@@ -200,25 +201,92 @@
     ctx.restore();
   }
 
-  // add event listener to canvas
-  // mousemove
-  //
+  // add event listeners to canvas on character selection
   function addEventToCanvas() {
     canvas.addEventListener('mousemove', onCanvasMouseMove);
     canvas.addEventListener('click', onCanvasClick);
+    canvas.addEventListener('touchstart', onCanvasTouchStart);
+    canvas.addEventListener('touchend', onCanvasTouchEnd);
+  }
+  // remove event listeners to canvas on character selection
+  function deleteEventToCanvas() {
+    canvas.removeEventListener('mousemove', onCanvasMouseMove);
+    canvas.removeEventListener('click', onCanvasClick);
+    canvas.removeEventListener('touchstart', onCanvasTouchStart);
+    canvas.removeEventListener('touchend', onCanvasTouchEnd);
+  }
+  // check if a position is on the element in the canvas
+  function checkIfPosOnBtn(posX, posY, elem) {
+    // get the (x,y) relative to the canvas
+    var x = posX - ctx.boundingRect.left,
+        y = posY - ctx.boundingRect.top;
+    if(x>elem.x && x<elem.x+elem.width && y>elem.y && y<elem.y+elem.height) { // check if (x,y) on the button
+      return true;
+    }
+    return false;
+  }
+  // check if characterChosen active
+  function checkIfCharChosen() {
+    return config.characterChosen.active;
+  }
+  var nn = 0;
+  function onCanvasTouchEnd(e) {
+    // console.log('touch end');
+    if(checkIfCharChosen()) {
+      for(var btn in chButtons) {
+        if(chButtons.hasOwnProperty(btn)){
+          var button = chButtons[btn];
+          for(var touchId = 0, touchLength=e.changedTouches.length; touchId < touchLength; touchId += 1) {
+            if(checkIfPosOnBtn(e.changedTouches[touchId].clientX, e.changedTouches[touchId].clientY, button)) {
+              button.hover = false;
+              // console.log(button);
+            }
+          }
+        }
+      }
+    }
   }
 
+  function onCanvasTouchStart(e) {
+    // console.log('touch start');
+    if(checkIfCharChosen()) {
+      for(var btn in chButtons) {
+        if(chButtons.hasOwnProperty(btn)){
+          var button = chButtons[btn];
+          for(var touchId = 0, touchLength=e.changedTouches.length; touchId < touchLength; touchId += 1) {
+            if(checkIfPosOnBtn(e.changedTouches[touchId].clientX, e.changedTouches[touchId].clientY, button)){
+              button.hover = true;
+              // console.log(button);
+            }
+          }
+        }
+      }
+    }
+  }
+
+  // invoke the button's callback if clicking the button
   function onCanvasClick(e) {
-    var rect = canvas.getBoundingClientRect();
-    var x = e.clientX - rect.left,
-        y = e.clientY - rect.top,
-        buttons = config.characterChosen.buttons;
-    if(config.characterChosen.active) { // check if in the character chosen interface
-      for( var btn in buttons) { // check each button
-        if(buttons.hasOwnProperty(btn)) {
-          var button = buttons[btn];
-          if(x>button.x && x<button.x+button.width && y>button.y && y<button.y+button.height) { // check if mouse on the button
-            button.callback();
+    if(checkIfCharChosen()) {
+      for(var btn in chButtons) {
+        var button = chButtons[btn];
+        if(chButtons.hasOwnProperty(btn) && checkIfPosOnBtn(e.clientX, e.clientY, button)) {
+          button.callback();
+        }
+      }
+    }
+  }
+  // change button's hover property to true if mouse move over the button
+  function onCanvasMouseMove(e) {
+    if(checkIfCharChosen()) {
+      for(var btn in chButtons) {
+        var button = chButtons[btn];
+        if(chButtons.hasOwnProperty(btn) && checkIfPosOnBtn(e.clientX, e.clientY, button)) {
+          if(!button.hover) {
+            button.hover = true;
+          }
+        } else {
+          if(button.hover) {
+            button.hover = false;
           }
         }
       }
@@ -240,31 +308,9 @@
     var id = config.characterChosen.characterPic.curIdx;
     // player.changeSprite(characterSprites[id]);
     config.characterChosen.active = false;
+    deleteEventToCanvas();
     gameState.userImg = characterSprites[id];
 
-  }
-  // change button's hover property to true if mouse move over the button
-  function onCanvasMouseMove(e) {
-    var rect = canvas.getBoundingClientRect();
-    var x = e.clientX - rect.left,
-        y = e.clientY - rect.top,
-        buttons = config.characterChosen.buttons;
-    if(config.characterChosen.active) { // check if in the character chosen interface
-
-      for( var btn in buttons) { // check each button
-        if(buttons.hasOwnProperty(btn)) {
-          var button = buttons[btn];
-          if(x>button.x && x<button.x+button.width && y>button.y && y<button.y+button.height) { // check if mouse on the button
-            button.hover = true;
-          } else {
-            if(button.hover) {
-              button.hover = false;
-            }
-          }
-
-        }
-      }
-    }
   }
 
   function initScore() {
@@ -284,8 +330,6 @@
     gameState.level = Math.max(Math.floor(gameState.score/100), 0);
   }
 
-  function init() {
-  }
   addEventToCanvas();
   manager = {
     render: render,
