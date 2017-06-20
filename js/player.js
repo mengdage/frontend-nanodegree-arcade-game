@@ -94,7 +94,10 @@
     // This listens for key presses and sends the keys to your
     // Player.handleInput() method. You don't need to modify this.
     document.addEventListener('keydown', function(e) {
-        player.handleInput(allowedKeys[e.keyCode]);
+      if(allowedKeys[e.keyCode]){
+        playSound('buttonPressed');
+      }
+      player.handleInput(allowedKeys[e.keyCode]);
     });
     document.addEventListener('touchstart', function(e){
       var touch = e.changedTouches[0];
@@ -102,6 +105,7 @@
       // console.log(`(${x},${y})`);
       // console.log(`(${player.x}, ${player.y})`);
       var direction = '';
+      playSound('buttonPressed');
       if(x<player.x) {
         direction = 'left';
       } else if(x>player.x+101){
@@ -123,6 +127,7 @@
       // console.log(`(${x},${y})`);
       // console.log(`(${player.x}, ${player.y})`);
       var direction = '';
+      playSound('buttonPressed');
       if(x<player.x) {
         direction = 'left';
       } else if(x>player.x+101){

@@ -11,6 +11,17 @@
     'images/char-horn-girl.png',
     'images/char-princess-girl.png'
   ];
+
+  var audioCtx;  // Defined in init.
+  var sounds = {
+    buttonPressed: {
+      audio: new Audio('sounds/button-press.wav'),
+      mediaElementSource: null  // Created in init.
+    }
+  };
+  // Audio needs to be primed by a user event on mobile devices.
+  var audioPrimed = false;
+
   // track the game state
   var gameState = {
     level: 0, // game level
@@ -131,6 +142,7 @@
       var buttons = config.characterChosen.buttons;
 
       ctx.clearRect(0, 0, canvas.width, canvas.height);
+      //draw border
       ctx.strokeRect(0,0, canvas.width, canvas.height);
       // draw all buttons
       for(var btn in buttons) {
@@ -145,6 +157,7 @@
     } else {
       // If update is needed, update the score on screen
       if(scoreBoard.needUpdate) {
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
         ctx.save();
         ctx.font = '36px Impact';
         ctx.fillStyle = '#000';
@@ -253,6 +266,7 @@
   function onTouchStart(e) {
     // e.preventDefault(); // prevent double touch zoom
     console.log('touch start');
+
     if(checkIfCharChosen()) {
       for(var btn in chButtons) {
         if(chButtons.hasOwnProperty(btn)){
@@ -260,6 +274,7 @@
           for(var touchId = 0, touchLength=e.changedTouches.length; touchId < touchLength; touchId += 1) {
             console.log(`(${e.changedTouches[touchId].pageX},${e.changedTouches[touchId].pageY})`);
             if(checkIfPosOnBtn(e.changedTouches[touchId].pageX, e.changedTouches[touchId].pageY, button)){
+              playSound('buttonPressed');
               button.hover = true;
 
               // console.log(button);
@@ -272,12 +287,14 @@
 
   // invoke the button's callback if clicking the button
   function onCanvasClick(e) {
+
     console.log('click');
     if(checkIfCharChosen()) {
       for(var btn in chButtons) {
         var button = chButtons[btn];
         console.log(`(${e.pageX},${e.pageY})`);
         if(chButtons.hasOwnProperty(btn) && checkIfPosOnBtn(e.pageX, e.pageY, button)) {
+          playSound('buttonPressed');
           button.callback();
         }
       }
@@ -338,11 +355,41 @@
     gameState.level = Math.max(Math.floor(gameState.score/100), 0);
   }
 
+  function playSound(sound) {
+    // Early abort if sound not in sounds.
+    if (!sounds[sound]) {
+      return;
+    }
+
+    sound = sounds[sound];
+    // Reset the track.
+    sound.audio.currentTime = 0;
+    // Set the track volume.
+    sound.audio.volume = 0.01;
+    // Play the track.
+    sound.audio.play();
+
+    // If audio context is defined...
+    if (audioCtx) {
+      // Connect the sound's audio context source to the audio context's destination.
+      sound.mediaElementSource.connect(audioCtx.destination);
+    }
+  }
+
   addEventToCanvas();
+  if (window.AudioContext) {
+    audioCtx = new window.AudioContext();
+
+    // Create the media element sources if using audio context.
+    for (var sound in sounds) {
+      sounds[sound].mediaElementSource = audioCtx.createMediaElementSource(sounds[sound].audio);
+    }
+  }
   manager = {
     render: render,
     update: update
   };
   global.gameState = gameState;
   global.manager = manager;
+  global.playSound = playSound;
 })(self);
