@@ -80,31 +80,13 @@ var Engine = (function(global) {
      * on the entities themselves within your app.js file).
      */
     function update(dt) {
-        updateEntities(dt);
-        // checkCollisions();
-        if(checkCollisions()) {
-          console.log('you lost');
-          scoreBoard.updateScore(-100);
-          player.reset();
-        }
-    }
 
-    // Check if any collision between player and enemies
-    // return true if there is a collision
-    function checkCollisions() {
-      var playerLeft = player.x;
-      var playerRight = player.x + 101;
-      for(var i = 0; i < allEnemies.length; i++) {
-        var enemy = allEnemies[i];
-        // 1. check if the enemy is in the same row with the player
-        // 2. check if collision
-        if((enemy.row === player.row) && (enemy.x<playerRight && (enemy.x+101)>playerLeft)){
-          return true;
-        }
-      }
-      return false;
-    }
+        if(manager.update()) {// check if need updating other objects
+          updateEntities(dt);
 
+        }
+
+    }
 
 
     /* This is called by the update function and loops through all of the
@@ -115,10 +97,17 @@ var Engine = (function(global) {
      * render methods.
      */
     function updateEntities(dt) {
-        allEnemies.forEach(function(enemy) {
-            enemy.update(dt);
-        });
-        player.update();
+        // var allEnemies = global.allEnemies;
+        var player = global.player;
+        if(allEnemies) {
+          allEnemies.forEach(function(enemy) {
+              enemy.update(dt);
+          });
+        }
+
+        if(player) {
+          player.update();
+        }
     }
 
     /* This function initially draws the "game level", it will then call
@@ -148,7 +137,7 @@ var Engine = (function(global) {
         if(!manager.render()){ // check if other renderings needed
           return;
         }
-        
+
         /* Loop through the number of rows and columns we've defined above
          * and, using the rowImages array, draw the correct image for that
          * portion of the "grid"
@@ -177,12 +166,17 @@ var Engine = (function(global) {
         /* Loop through all of the objects within the allEnemies array and call
          * the render function you have defined.
          */
-        allEnemies.forEach(function(enemy) {
+         if(allEnemies) {
+          allEnemies.forEach(function(enemy) {
             enemy.render();
-        });
+          });
 
-        player.render();
-        scoreBoard.render();
+         }
+
+        // var player = global.player;
+         if(player) {
+          player.render();
+         }
     }
 
     /* This function does nothing but it could have been a good place to
@@ -191,7 +185,6 @@ var Engine = (function(global) {
      */
     function reset() {
         // noop
-        manager.init();
     }
 
     /* Go ahead and load all of the images we know we're going to need to

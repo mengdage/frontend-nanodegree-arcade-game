@@ -18,6 +18,7 @@
         levelDepExtraSpeed = 100;
     var speedLowerBound = baseLowerSpeed + (level-1)*levelDepExtraSpeed;
     var speedUpperBound = baseUpperSpeed + (level-1)*levelDepExtraSpeed;
+    this.level = level;
     this.speed = util.randomInt(speedLowerBound, speedUpperBound);
   };
 
@@ -37,6 +38,10 @@
   // Update the enemy's position, required method for game
   // Parameter: dt, a time delta between ticks
   Enemy.prototype.update = function(dt) {
+      // check if the enemy has the correct level
+      if(this.level != gameState.level) {
+        this.newSpeed(gameState.level);
+      }
       // You should multiply any movement by the dt parameter
       // which will ensure the game runs at the same speed for
       // all computers.
@@ -57,9 +62,34 @@
   };
   // Place all enemy objects in an array called allEnemies
   var allEnemies = [];
-  allEnemies.push(new Enemy());
-  allEnemies.push(new Enemy());
-  allEnemies.push(new Enemy());
+  var enemies = {
+    allEnemies: [],
+    addNewEnemy: function() {
+      this.allEnemies.push(new Enemy());
+    },
+    deleteEnemy: function() {
+      this.allEnemies.pop();
+    },
+    setEnemiesNum: function(num) {
+      var len = this.allEnemies.length;
+      if(len > num) {
+        while(len > num) {
+          this.deleteEnemy();
+          len = this.allEnemies.length;
+        }
+      } else if(len<num) {
+        while(len < num) {
+          this.addNewEnemy();
+          len = this.allEnemies.length;
+        }
+      }
+    },
+    init: function() {
+      this.allEnemies = [];
+    }
+  };
 
-  global.allEnemies = allEnemies;
+
+  global.enemies = enemies;
+  global.allEnemies = enemies.allEnemies;
 })(self);

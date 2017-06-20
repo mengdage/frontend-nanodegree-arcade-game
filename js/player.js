@@ -1,7 +1,12 @@
 (function(global){
   // The player class
-  var Player = function(){
-    this.sprite = 'images/char-pink-girl.png';
+  var Player = function(sprite){
+    // in case users forgetting new keyword
+    if(!(this instanceof Player)) {
+      return new Player();
+    }
+
+    this.sprite = sprite;
     this.reset();
   };
 
@@ -24,11 +29,11 @@
   // Update the player's state if necessary
   Player.prototype.update = function(dt) {
     // if the play wins, increase the score and reset the player
-    if(this.checkWin()) {
-      console.log('you win!');
-      scoreBoard.updateScore(100);
-      this.reset();
-    }
+    // if(this.checkWin()) {
+    //   console.log('you win!');
+    //   manager.updateScore(100);
+    //   this.reset();
+    // }
   };
 
   // Draw the player on the screen at (x, y)
@@ -75,22 +80,24 @@
       default:
     }
   };
-  
-  // Place the player object in a variable called player
-  var player = new Player();
 
-  // This listens for key presses and sends the keys to your
-  // Player.handleInput() method. You don't need to modify this.
-  document.addEventListener('keydown', function(e) {
-      var allowedKeys = {
-          37: 'left',
-          38: 'up',
-          39: 'right',
-          40: 'down'
-      };
+  // add keydown listen
+  Player.prototype.listenKeydown = function() {
+    // This listens for key presses and sends the keys to your
+    // Player.handleInput() method. You don't need to modify this.
+    document.addEventListener('keydown', function(e) {
+        var allowedKeys = {
+            37: 'left',
+            38: 'up',
+            39: 'right',
+            40: 'down'
+        };
 
-      player.handleInput(allowedKeys[e.keyCode]);
-  });
+        player.handleInput(allowedKeys[e.keyCode]);
+    });
 
-  global.player = player;
+  };
+
+  global.Player = Player;
+  global.player = null;
 })(self);

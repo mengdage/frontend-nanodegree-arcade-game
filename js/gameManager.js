@@ -2,6 +2,7 @@
   'use strict';
   var manager;
   var canvas = document.getElementsByTagName('canvas')[0];
+  var util = global.util;
   // var player = global.player;
 
   var characterSprites = [
@@ -19,6 +20,7 @@
       level: 0,
       score: 0
     },
+    maxEnemies: 4,
     userImg: ''
   };
   // config statistics
@@ -67,30 +69,92 @@
         width: 101,
         height: 171
       }
+    },
+    scoreBoard: {
+      needUpdate: true,
+      x: 10,
+      y: 30
     }
   };
-
-  // render the buttons and character pictures
-  // return true if render happens
-  // return false if rendering is not needed
-  function render() {
-    if(!config.characterChosen.active) { // check if rendering is needed
-      return false;
-    }
-    // the buttons object which contains all buttons to be drawn
-    var buttons = config.characterChosen.buttons;
-
-    ctx.clearRect(0, 0, canvas.width, canvas.height);
-    // draw all buttons
-    for(var btn in buttons) {
-      if(buttons.hasOwnProperty(btn)) {
-        var button = buttons[btn];
-        drawBtn(button);
+  // Check if any collision between player and enemies
+  // return true if there is a collision
+  function checkCollisions() {
+    var playerLeft = player.x;
+    var playerRight = player.x + 101;
+    for(var i = 0; i < allEnemies.length; i++) {
+      var enemy = allEnemies[i];
+      // 1. check if the enemy is in the same row with the player
+      // 2. check if collision
+      if((enemy.row === player.row) && (enemy.x<playerRight && (enemy.x+101)>playerLeft)){
+        return true;
       }
     }
-    // draw character
-    drawInitialCharacter();
-    return true;
+    return false;
+  }
+  // manage player and allEnemies
+  // return true: need updating other objects
+  // return false: dont need updating other objects
+  function update() {
+    if(!config.characterChosen.active) { // check if updating player, enemies are needed
+      if(!player) {
+        player = new Player(gameState.userImg);
+        player.listenKeydown();
+      }
+      if(checkCollisions()) {
+        console.log('you lost');
+        updateScore(-100);
+        player.reset();
+      }
+      if(player.checkWin()) {
+        console.log('you win!');
+        updateScore(100);
+        player.reset();
+      }
+      if(allEnemies.length != (gameState.level+1)) {
+        var enemiesNum = Math.min(gameState.level+1, gameState.maxEnemies);
+        enemies.setEnemiesNum(enemiesNum);
+      }
+      return true;
+    } else {
+      return false;
+    }
+  }
+
+  // render the buttons and character pictures
+  // return true if other renderings are needed
+  // return false if other rendering are not needed
+  function render() {
+    var scoreBoard = config.scoreBoard;
+    if(config.characterChosen.active) { // check if rendering is needed
+      // the buttons object which contains all buttons to be drawn
+      var buttons = config.characterChosen.buttons;
+
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      // draw all buttons
+      for(var btn in buttons) {
+        if(buttons.hasOwnProperty(btn)) {
+          var button = buttons[btn];
+          drawBtn(button);
+        }
+      }
+      // draw character
+      drawInitialCharacter();
+      return false;
+    } else {
+      // If update is needed, update the score on screen
+      if(scoreBoard.needUpdate) {
+        ctx.save();
+        ctx.font = '36px Impact';
+        ctx.fillStyle = '#000';
+
+        ctx.clearRect(0, 0, 505, 39);
+        ctx.fillText('Score: ' + gameState.score + '  Level: ' + gameState.level, scoreBoard.x, scoreBoard.y);
+        ctx.restore();
+
+        scoreBoard.needUpdate = false;
+      }
+      return true;
+    }
   }
   // draw the given button on the canvas
   function drawBtn(button) {
@@ -176,7 +240,7 @@
     var id = config.characterChosen.characterPic.curIdx;
     // player.changeSprite(characterSprites[id]);
     config.characterChosen.active = false;
-    gameState.userImage = characterSprites[id];
+    gameState.userImg = characterSprites[id];
 
   }
   // change button's hover property to true if mouse move over the button
@@ -203,11 +267,29 @@
     }
   }
 
+  function initScore() {
+    var scoreBoard = config.scoreBoard;
+    scoreBoard.needUpdate = true;
+    // update gameState
+    gameState.score = gameState.initialStat.score;
+    gameState.level = gameState.initialStat.level;
+  }
+  // Update the score value by adding v to the value
+  function updateScore(v) {
+    var scoreBoard = config.scoreBoard;
+    scoreBoard.needUpdate = true;
+    // update score
+    gameState.score+= v;
+    // update level
+    gameState.level = Math.max(Math.floor(gameState.score/100), 0);
+  }
+
   function init() {
   }
   addEventToCanvas();
   manager = {
-    render: render
+    render: render,
+    update: update
   };
   global.gameState = gameState;
   global.manager = manager;
