@@ -96,10 +96,32 @@
     document.addEventListener('keydown', function(e) {
         player.handleInput(allowedKeys[e.keyCode]);
     });
+    document.addEventListener('touchstart', function(e){
+      var touch = e.changedTouches[0];
+      var x = touch.pageX-ctx.boundingRect.left, y = touch.pageY-ctx.boundingRect.top;
+      // console.log(`(${x},${y})`);
+      // console.log(`(${player.x}, ${player.y})`);
+      var direction = '';
+      if(x<player.x) {
+        direction = 'left';
+      } else if(x>player.x+101){
+        direction = 'right';
+      } else {
+        if(y<player.y+60) {
+          direction = 'up';
+        } else if(y>player.y+145) {
+          direction = 'down';
+        }
+      }
+      player.handleInput(direction);
+    });
+    document.addEventListener('touchend', function(e){
+      e.preventDefault(); // prevent double touch zoom
+    });
     document.addEventListener('click', function(e){
-      var x = e.clientX-ctx.boundingRect.left, y = e.clientY-ctx.boundingRect.top;
-      console.log(`(${x},${y})`);
-      console.log(`(${player.x}, ${player.y})`);
+      var x = e.pageX-ctx.boundingRect.left, y = e.pageY-ctx.boundingRect.top;
+      // console.log(`(${x},${y})`);
+      // console.log(`(${player.x}, ${player.y})`);
       var direction = '';
       if(x<player.x) {
         direction = 'left';

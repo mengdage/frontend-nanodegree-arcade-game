@@ -131,6 +131,7 @@
       var buttons = config.characterChosen.buttons;
 
       ctx.clearRect(0, 0, canvas.width, canvas.height);
+      ctx.strokeRect(0,0, canvas.width, canvas.height);
       // draw all buttons
       for(var btn in buttons) {
         if(buttons.hasOwnProperty(btn)) {
@@ -205,15 +206,15 @@
   function addEventToCanvas() {
     canvas.addEventListener('mousemove', onCanvasMouseMove);
     canvas.addEventListener('click', onCanvasClick);
-    canvas.addEventListener('touchstart', onCanvasTouchStart);
-    canvas.addEventListener('touchend', onCanvasTouchEnd);
+    document.addEventListener('touchstart', onTouchStart);
+    document.addEventListener('touchend', onTouchEnd);
   }
   // remove event listeners to canvas on character selection
   function deleteEventToCanvas() {
     canvas.removeEventListener('mousemove', onCanvasMouseMove);
     canvas.removeEventListener('click', onCanvasClick);
-    canvas.removeEventListener('touchstart', onCanvasTouchStart);
-    canvas.removeEventListener('touchend', onCanvasTouchEnd);
+    document.removeEventListener('touchstart', onTouchStart);
+    document.removeEventListener('touchend', onTouchEnd);
   }
   // check if a position is on the element in the canvas
   function checkIfPosOnBtn(posX, posY, elem) {
@@ -230,15 +231,17 @@
     return config.characterChosen.active;
   }
   var nn = 0;
-  function onCanvasTouchEnd(e) {
-    // console.log('touch end');
+  function onTouchEnd(e) {
+    e.preventDefault(); // prevent double touch zoom
+    console.log('touch end');
     if(checkIfCharChosen()) {
       for(var btn in chButtons) {
         if(chButtons.hasOwnProperty(btn)){
           var button = chButtons[btn];
           for(var touchId = 0, touchLength=e.changedTouches.length; touchId < touchLength; touchId += 1) {
-            if(checkIfPosOnBtn(e.changedTouches[touchId].clientX, e.changedTouches[touchId].clientY, button)) {
+            if(checkIfPosOnBtn(e.changedTouches[touchId].pageX, e.changedTouches[touchId].pageY, button)) {
               button.hover = false;
+              button.callback();
               // console.log(button);
             }
           }
@@ -247,15 +250,18 @@
     }
   }
 
-  function onCanvasTouchStart(e) {
-    // console.log('touch start');
+  function onTouchStart(e) {
+    // e.preventDefault(); // prevent double touch zoom
+    console.log('touch start');
     if(checkIfCharChosen()) {
       for(var btn in chButtons) {
         if(chButtons.hasOwnProperty(btn)){
           var button = chButtons[btn];
           for(var touchId = 0, touchLength=e.changedTouches.length; touchId < touchLength; touchId += 1) {
-            if(checkIfPosOnBtn(e.changedTouches[touchId].clientX, e.changedTouches[touchId].clientY, button)){
+            console.log(`(${e.changedTouches[touchId].pageX},${e.changedTouches[touchId].pageY})`);
+            if(checkIfPosOnBtn(e.changedTouches[touchId].pageX, e.changedTouches[touchId].pageY, button)){
               button.hover = true;
+
               // console.log(button);
             }
           }
@@ -266,10 +272,12 @@
 
   // invoke the button's callback if clicking the button
   function onCanvasClick(e) {
+    console.log('click');
     if(checkIfCharChosen()) {
       for(var btn in chButtons) {
         var button = chButtons[btn];
-        if(chButtons.hasOwnProperty(btn) && checkIfPosOnBtn(e.clientX, e.clientY, button)) {
+        console.log(`(${e.pageX},${e.pageY})`);
+        if(chButtons.hasOwnProperty(btn) && checkIfPosOnBtn(e.pageX, e.pageY, button)) {
           button.callback();
         }
       }
@@ -280,7 +288,7 @@
     if(checkIfCharChosen()) {
       for(var btn in chButtons) {
         var button = chButtons[btn];
-        if(chButtons.hasOwnProperty(btn) && checkIfPosOnBtn(e.clientX, e.clientY, button)) {
+        if(chButtons.hasOwnProperty(btn) && checkIfPosOnBtn(e.pageX, e.pageY, button)) {
           if(!button.hover) {
             button.hover = true;
           }

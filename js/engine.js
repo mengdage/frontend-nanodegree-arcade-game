@@ -30,12 +30,13 @@ var Engine = (function(global) {
     canvas.height = 606;
 
     doc.body.appendChild(canvas);
+    console.log(canvas.offsetTop+' '+canvas.offsetLeft);
     var canvasBound = canvas.getBoundingClientRect();
     ctx.boundingRect = {
       width: canvas.width,
       height: canvas.height,
-      top: canvasBound.top,
-      left: canvasBound.left
+      top: canvas.offsetTop,
+      left: canvas.offsetLeft
     };
     /* This function serves as the kickoff point for the game loop itself
      * and handles properly calling the update and render methods.
