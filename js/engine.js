@@ -84,7 +84,7 @@ var Engine = (function(global) {
         // checkCollisions();
         if(checkCollisions()) {
           console.log('you lost');
-          scoreBoard.update(-1);
+          scoreBoard.updateScore(-100);
           player.reset();
         }
     }
@@ -128,6 +128,8 @@ var Engine = (function(global) {
      * they are just drawing the entire screen over and over.
      */
     function render() {
+
+
         /* This array holds the relative URL to the image used
          * for that particular row of the game level.
          */
@@ -143,6 +145,10 @@ var Engine = (function(global) {
             numCols = 5,
             row, col;
 
+        if(!manager.render()){ // check if other renderings needed
+          return;
+        }
+        
         /* Loop through the number of rows and columns we've defined above
          * and, using the rowImages array, draw the correct image for that
          * portion of the "grid"
@@ -185,6 +191,7 @@ var Engine = (function(global) {
      */
     function reset() {
         // noop
+        manager.init();
     }
 
     /* Go ahead and load all of the images we know we're going to need to
@@ -192,12 +199,20 @@ var Engine = (function(global) {
      * all of these images are properly loaded our game will start.
      */
     Resources.load([
+        // environment pictures
         'images/stone-block.png',
         'images/water-block.png',
         'images/grass-block.png',
+
+        // enemy pictures
         'images/enemy-bug.png',
+
+        // character pictures
         'images/char-boy.png',
-        'images/char-pink-girl.png'
+        'images/char-pink-girl.png',
+        'images/char-cat-girl.png',
+        'images/char-horn-girl.png',
+        'images/char-princess-girl.png'
     ]);
     Resources.onReady(init);
 
