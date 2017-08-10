@@ -1,4 +1,4 @@
-# frontend-nanodegree-arcade-game
+# A Clone of the Classic Frogger Game
 
 ![GUI](wiki/images/Frogger.jpg?raw=true "Frogger")
 
